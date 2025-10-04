@@ -1,0 +1,268 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler, MinMaxScaler
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+
+
+# Load & Manipulate Data
+
+df = pd.read_csv("/content/california_housing.csv")
+
+pd.set_option('display.max_columns', None)
+
+print(df.head(5))
+
+print(df.shape)
+
+print(df.info())
+
+print("\nMissing Values:")
+
+print(df.isnull().sum())
+
+print("\nDuplicate:")
+
+print(df.duplicated().sum())
+
+
+# Exploratory Data Analysis (EDA)
+
+print(df.describe())
+
+print("\nMedian:")
+
+print(df.median())
+
+df_small = df.sample(200, random_state=42)
+
+# Visualizations
+
+# Histogram of Price
+
+sns.histplot(x=df['Price'],kde=True)
+plt.xlabel("Price")
+plt.ylabel("Frequency")
+plt.title("Histogram of Price")
+plt.show()
+
+# Scatter plot: Income vs Price
+
+sns.scatterplot(x=df_small['Income'],y=df_small['Price'])
+plt.xlabel("Income")
+plt.ylabel("Price")
+plt.title("Scatter plot: Income vs Price")
+plt.show()
+
+# Correlation heatmap of all features
+
+corr_matrix = df.corr()
+plt.figure(figsize=(10, 8))
+sns.heatmap(corr_matrix, annot=True, cmap='coolwarm')
+plt.title('Correlation Heatmap')
+plt.show()
+
+
+# Preprocessing & Outlier Detection
+
+# Scale numeric features (StandardScaler or MinMaxScaler)
+# Selecting Income and Price columns for scaling demonstration
+
+# Select only Income and Price for scaling
+data_for_scaling = df_small[['Income', 'Price']]
+
+# Standardization
+scaler = StandardScaler()
+standardized = scaler.fit_transform(data_for_scaling)
+
+# Normalization (Min-Max scaling)
+minmax_scaler = MinMaxScaler()
+normalized = minmax_scaler.fit_transform(data_for_scaling)
+
+# Plotting Original vs Standardized vs Normalized
+fig, axs = plt.subplots(1, 3, figsize=(18,6))
+
+# Original
+sns.scatterplot(x=data_for_scaling["Income"], y=data_for_scaling["Price"], ax=axs[0], color="blue")
+axs[0].set_title("Original")
+axs[0].set_xlabel("Income")
+axs[0].set_ylabel("Price")
+
+# Standardized
+sns.scatterplot(x=standardized[:,0], y=standardized[:,1], ax=axs[1], color="green")
+axs[1].set_title("Standardized (Income vs Price)")
+axs[1].set_xlabel("Standardized Income")
+axs[1].set_ylabel("Standardized Price")
+
+# Normalized
+sns.scatterplot(x=normalized[:,0], y=normalized[:,1], ax=axs[2], color="red")
+axs[2].set_title("Normalized (Income vs Price)")
+axs[2].set_xlabel("Normalized Income")
+axs[2].set_ylabel("Normalized Price")
+
+plt.tight_layout()
+plt.show()
+
+# Outlier detection
+
+# Boxplot for Income
+
+sns.boxplot(y=df['Income'])
+plt.ylabel("Income")
+plt.title("Boxplot: Income")
+plt.show()
+
+# Boxplot for Rooms
+
+sns.boxplot(y=df['Rooms'])
+plt.ylabel("Rooms")
+plt.title("Boxplot: Rooms")
+plt.show()
+
+# Removing Outliers
+
+df = df[df['Income'] < 7.5]
+
+df = df[(df['Rooms'] < 8) & (df['Rooms'] > 2.3)]
+
+
+
+sns.boxplot(y=df['Income'])
+plt.xlabel('Income')
+plt.title('Outlier Removal : Income')
+plt.show()
+
+sns.boxplot(y=df['Rooms'])
+plt.xlabel('Rooms')
+plt.title('Outlier Removal : Rooms')
+plt.show()
+
+# Train Test Split
+
+X1 = df[['Income']]
+y1 = df['Price']
+
+# Random Split by Income
+
+X_train1, X_test1, y_train1, y_test1 = train_test_split( X1, y1, test_size=0.2, random_state=42)
+
+
+# Startified Split Based on Income
+# Create income bins for stratification
+
+df['income'] = pd.cut(df['Income'], bins=10, labels=False)
+
+X2 = df[['Income', 'Rooms']]
+y2 = df['Price']
+
+X_train2, X_test2, y_train2, y_test2 = train_test_split(X2, y2, test_size=0.2, stratify=df['income'], random_state=42)
+
+
+# Compare Distribution Between Random Split and Startified Split
+print("\nRandom Split:")
+print("\nTrain set distribution:\n",y_train1.value_counts(normalize=True))
+print("\nTest set distribution:\n",y_test1.value_counts(normalize=True))
+
+print("\nStartified Split:")
+print("\nTrain set distribution:\n",y_train2.value_counts(normalize=True))
+print("\nTest set distribution:\n",y_test2.value_counts(normalize=True))
+
+# Linear Regression
+
+X = df_small[['Income']]
+y = df_small['Price']
+
+X_train, X_test, y_train, y_test = train_test_split( X, y, test_size=0.2, random_state=42)
+
+model = LinearRegression().fit(X_train, y_train)
+
+y_predicted = model.predict(X_test)
+
+# Regression Plot
+
+sns.regplot(x=X_test['Income'],y=y_test,line_kws={'color':'red'})
+plt.xlabel("Income")
+plt.ylabel("Price")
+plt.title("Regression Plot")
+plt.show()
+
+print("\nLinear Regression Model Evaluation:")
+print('Mean Absolute Error:', mean_absolute_error(y_test,y_predicted))
+print('Mean Squared Error:', mean_squared_error(y_test, y_predicted))
+print('R-Squared:', r2_score(y_test,y_predicted))
+
+# Multiple Regression Predicting Price using all features
+
+a = df_small[['Income','Age','Rooms','Bedrooms','Population','Occupancy','Latitude','Longitude']]
+b = df_small['Price']
+
+a_train, a_test, b_train, b_test = train_test_split(a, b, test_size=0.2, random_state=42)
+
+model = LinearRegression().fit(a_train, b_train)
+
+b_predicted = model.predict(a_test)
+
+# Multiple Regression Plot
+
+sns.regplot(x=a_test['Income'],y=b_test,line_kws={'color':'red'})
+plt.xlabel("Income")
+plt.ylabel("Price")
+plt.title("Multiple Regression Plot")
+plt.show()
+
+print("\nMultiple Regression Model Evaluation:")
+print('Mean Absolute Error:', mean_absolute_error(b_test, b_predicted))
+print('Mean Squared Error:', mean_squared_error(b_test, b_predicted))
+print('R-Squared:', r2_score(b_test, b_predicted))
+
+# Residuals
+
+Residuals = b_test - b_predicted
+
+# Check Assumptions
+
+#	Linearity: Plot predicted vs actual
+
+sns.scatterplot(x=b_test,y=b_predicted)
+plt.xlabel("Actual Price")
+plt.ylabel("Predicted Price")
+plt.title("Actual vs Predicted Price")
+plt.show()
+
+#	Independence: Residuals vs order.
+
+plt.plot(Residuals.reset_index(drop=True), marker='o', linestyle='')
+plt.axhline(0, color="red", linestyle="--")
+plt.xlabel("Order")
+plt.ylabel("Residuals")
+plt.title("Residuals vs Order")
+plt.show()
+
+# Homoscedasticity: Predicted vs residuals
+
+plt.scatter(b_predicted, Residuals, color="purple")
+plt.axhline(0, color="red", linestyle="--")
+plt.xlabel("Predicted Price")
+plt.ylabel("Residuals")
+plt.title("Predicted vs Residuals")
+plt.show()
+
+#	Normality: Histogram/Q-Q plot of residuals
+
+sns.histplot(Residuals, kde=True, color="green")
+plt.xlabel("Residuals")
+plt.ylabel("Frequency")
+plt.title("Normality Check")
+plt.show()
+
+# Error Metrics
+
+print("\nResiduals & Error Metrics:")
+print('Mean Absolute Error:', mean_absolute_error(b_test, b_predicted))
+print('Mean Squared Error:', mean_squared_error(b_test, b_predicted))
+print('R-Squared:', r2_score(b_test, b_predicted))
+
+
