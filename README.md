@@ -2,13 +2,13 @@
 California Housing Price Prediction Project
 
 
-🏠 Project Description
+🏠 Project Description : 
 This project focuses on predicting the median house value for districts in California using a regression model. The analysis involves exploring the dataset, preparing the features, training a machine learning model, and evaluating its performance.
 
-🎯 Goal
+🎯 Goal : 
 The primary objective is to build a predictive model that accurately estimates the **Median House Price** (`Price`) based on various socio-economic and geographical features of the California housing districts.
 
-📊 Dataset
+📊 Dataset : 
 The project utilizes the California Housing dataset.
 
 | Feature Name | Description |
@@ -25,7 +25,7 @@ The project utilizes the California Housing dataset.
 
 The dataset contains **20,640 entries** and was found to have **no missing values** or **duplicates** during the initial data inspection.
 
-🧪 Methodology
+🧪 Methodology : 
 The project follows a standard machine learning workflow, including:
 
 1.  **Data Loading and Inspection**: Initial review of the dataset structure and summary statistics.
@@ -37,13 +37,13 @@ The project follows a standard machine learning workflow, including:
     * **Linearity/Independence** (Residuals vs Order plot).
 5.  **Evaluation**: The model performance was assessed using key regression metrics.
 
-📈 Evaluation Metrics
+📈 Evaluation Metrics : 
 The model's performance was evaluated using the following error metrics:
 
 * **Mean Absolute Error (MAE)**
 * **Mean Squared Error (MSE)**
 
-🛠️ Requirements & Dependencies
+🛠️ Requirements & Dependencies : 
 The notebook uses standard Python data science libraries. You will need the following to run the project:
 
 * `pandas`
